@@ -1,5 +1,6 @@
 from json_responses import json_response, json_data, json_error
 from flask import Flask, request
+import json
 import requests
 
 app = Flask(__name__)
@@ -15,7 +16,10 @@ def hello():
 def beaconInscript():
     print("beaconInscript")
     r = requests.get('https://couchdb.mignolet.fr/beacondb/_design/type/_view/join?reduce=false')
-    return json_response(r.json(),r.status_code)
+    data = json.loads(r.content)
+    print(data["rows"][0]["value"])
+    dataValue = data["rows"][0]["value"]
+    return json_response(dataValue,r.status_code)
 
 #inscription team
 @app.route('/inscript', methods=['POST'])
@@ -32,7 +36,10 @@ def inscript():
 def beaconSendPicture():
     print("beaconInscript")
     r = requests.get('https://couchdb.mignolet.fr/beacondb/_design/type/_view/depot?reduce=false')
-    return json_response(r.json(), r.status_code)
+    data = json.loads(r.content)
+    print(data["rows"][0]["value"])
+    dataValue = data["rows"][0]["value"]
+    return json_response(dataValue, r.status_code)
 
 #liste objet search
 @app.route('/newListe' , methods=['GET'])
