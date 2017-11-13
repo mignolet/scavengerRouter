@@ -2,9 +2,13 @@ from json_responses import json_response, json_data, json_error
 from flask import Flask, request
 import json
 import requests
+import os
 
 app = Flask(__name__)
 app.debug = True
+
+admin = os.environ.get("LOGINCOUCHDB")
+pwd = os.environ.get("PWDCOUCHDB")
 
 
 @app.route('/')
@@ -24,12 +28,35 @@ def beaconInscript():
 #inscription team
 @app.route('/inscript', methods=['POST'])
 def inscript():
-    #android id
     print("inscription team")
     id = request.get_json(force=True)
-    jsonData = id["device_id"]
-    r = requests.put('https://admin:adminsoc@couchdb.mignolet.fr/teambd/"002"')
-    return json_response(r.json(), r.status_code)
+    print(id)
+    jsonData = id["id"]
+    print("device_id: "+jsonData)
+    #get number team
+    teamrequest = requests.get("https://couchdb.mignolet.fr/teamdb/_design/_all_team/_view/num")
+    print(teamrequest.json())
+
+    #json parse
+    numTeam = json.loads(teamrequest.content)
+    if not numTeam["rows"]:
+        num = 1
+    else:
+        num = numTeam["rows"][0]["value"] + 1
+    print("News team: "+ str(num))
+
+    jsonTeam = '{"name": "team'+str(num)+'" ,"idDevice":"'+jsonData+'"}'
+    print(jsonTeam)
+
+    #write in couchdb news team
+    r = requests.put("https://"+admin+":"+pwd+"@couchdb.mignolet.fr/teamdb/'team"+str(num)+"'", data=jsonTeam)
+    print(r.json())
+
+    #creation de l'instance for team
+
+    return json_response("", r.status_code)
+
+
 
 #id beacon send picture
 @app.route('/beaconSendPicture', methods=['GET'])
