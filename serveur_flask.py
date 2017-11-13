@@ -1,6 +1,5 @@
 from json_responses import json_response, json_data, json_error
 from flask import Flask, request
-from flask_cors import CORS
 import requests
 
 app = Flask(__name__)
