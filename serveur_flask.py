@@ -93,7 +93,7 @@ def inscript():
     print(jsonTeam)
 
     #write in couchdb news team
-    r = requests.put("https://"+admin+":"+pwd+"@couchdb.mignolet.fr/teamdb/team"+str(num)+"", data=jsonTeam)
+    r = requests.put("https://"+admin+":"+pwd+"@couchdb.mignolet.fr/teamdb/"+str(jsonData), data=jsonTeam)
     print(r.json())
 
     #creation de l'instance for team
@@ -180,10 +180,14 @@ def linkInstance():
     sendIp = requests.put("https://couchdb.mignolet.fr/teamdb/"+str(data["rows"][0]["value"]["_id"])+"",data=jsonDataTem)
     return json_response(sendIp.json())
 
-#redirecte instance for team
-@app.route('/redirecte')
-def redirecte():
-    return 'redirecte'
+#team inscript
+@app.route('/team',methods=['POST'])
+def team():
+    jsonData = request.get_json(force=True)
+    print(jsonData)
+    data = requests.get("https://couchdb.mignolet.fr/teamdb/" + str(jsonData["id"]))
+    print(data.json())
+    return json_response(data.json(),data.status_code)
 
 
 #redirecte instance for team
@@ -191,16 +195,54 @@ def redirecte():
 def picture():
     screenRasp("3")
     # get picture
-    imagefile = request.files['file']
-    print(imagefile)
+    #imagefile = request.files['file']
+    #print(imagefile)
     # get data json
-    jsonData = requests.get_json(force=True)
-    data = jsonData.loads(jsonData.content)
+    jsonData = request.get_json(force=True)
+    print(jsonData)
+    data = jsonData["longitude"]
     print(data)
 
+    dataTeam = requests.get("https://couchdb.mignolet.fr/teamdb/"+str(jsonData["id_Equipe"]))
+    Hote = json.loads(dataTeam.content)
+    urlInstance = Hote["ipInstance"]+":5000"+ "/Classifier"
+    print(urlInstance)
 
-    #screenRasp("2")
-    return 'redirecte'
+    try:
+        reponseVisio = requests.put(urlInstance, data=jsonData)
+        if reponseVisio:
+            screenRasp("1")
+        else:
+            screenRasp("2")
+        return reponseVisio
+    except:
+        screenRasp("2")
+        return json_error("serveur en maintemance")
+
+#get point equioe
+@app.route('/teamPicture', methods=['POST'])
+def teampicture():
+    jsonData = request.get_json(force=True)
+    dataTeam = requests.get("https://couchdb.mignolet.fr/teamdb/" + str(jsonData["id_Equipe"]))
+    Hote = json.loads(dataTeam.content)
+    urlInstance = Hote["ipInstance"] + ":5000" + "/getImage"
+    jsonEquipe = '{"id_equipe":"'+jsonData["id_Equipe"]+'"}'
+    imageEquipe = requests.put(urlInstance, data=jsonEquipe)
+    return json_response(imageEquipe.json())
+
+#get equipe game
+@app.route('/equipeGame', methods=['GET'])
+def allequipeGame():
+    dataTeam = requests.get("https://couchdb.mignolet.fr/teamdb/_design/_all_team/_view/num?limit=20&reduce=false")
+    print(dataTeam.json())
+    return dataTeam.json()
+
+#get imaga equipe
+@app.route('/teamPoints', methods=['POST'])
+def teampoints():
+    jsonData = request.get_json(force=True)
+    dataTeam = requests.get("https://couchdb.mignolet.fr/objetfinddb/_all_docs?key="+jsonData["id_Equipe"])
+    return dataTeam.json()
 
 #publish status Mqtt
 def screenRasp(status):
