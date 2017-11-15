@@ -14,6 +14,17 @@ admin = os.environ.get("LOGINCOUCHDB")
 pwd = os.environ.get("PWDCOUCHDB")
 
 
+def on_connect(client, userdata, flags, rc):
+    print("rc: " + str(rc))
+
+def on_message(client, obj, msg):
+    print(msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
+
+def on_publish(client, obj, mid):
+    print("mid: " + str(mid))
+
+def on_log(client, obj, level, string):
+    print(string)
 
 def countparty():
     # get number party
@@ -176,7 +187,7 @@ def redirecte():
 
 
 #redirecte instance for team
-@app.route('/picture')
+@app.route('/picture', methods=['POST'])
 def picture():
     screenRasp("3")
     # get picture
@@ -212,19 +223,6 @@ def connectMqtt():
     mqttc.connect(url.hostname, url.port)
     print("mqttc connecte")
     return mqttc
-
-def on_connect(client, userdata, flags, rc):
-    print("rc: " + str(rc))
-
-def on_message(client, obj, msg):
-    print(msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
-
-def on_publish(client, obj, mid):
-    print("mid: " + str(mid))
-
-def on_log(client, obj, level, string):
-    print(string)
-
 
 
 if __name__ == '__main__':
