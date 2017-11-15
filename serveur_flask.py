@@ -2,7 +2,9 @@ from json_responses import json_response, json_data, json_error
 from flask import Flask, request
 import json
 import requests
-import os
+import os, urlparse
+import paho.mqtt.client as mqtt
+from time import sleep
 
 
 app = Flask(__name__)
@@ -10,6 +12,7 @@ app.debug = True
 
 admin = os.environ.get("LOGINCOUCHDB")
 pwd = os.environ.get("PWDCOUCHDB")
+
 
 
 def countparty():
@@ -75,7 +78,7 @@ def inscript():
         num = numTeam["rows"][0]["value"] + 1
     print("News team: "+ str(num))
 
-    jsonTeam = '{"name": "team'+str(num)+'" ,"idDevice":"'+jsonData+'"}'
+    jsonTeam = '{"name": "team'+str(num)+'" ,"idDevice":"'+jsonData+'", "ipInstance" : "none"}'
     print(jsonTeam)
 
     #write in couchdb news team
@@ -83,8 +86,10 @@ def inscript():
     print(r.json())
 
     #creation de l'instance for team
+        #rancher webhook
 
-    return json_response("", r.status_code)
+
+    return json_response(r.json(), r.status_code)
 
 
 
@@ -104,7 +109,6 @@ def beaconSendPicture():
 #liste objet search
 @app.route('/liste' , methods=['GET'])
 def newsListe():
-
     print("Liste objet")
 
     # get nomber liste search
@@ -152,14 +156,74 @@ def newsListe():
 
 
 #link instance for team
-@app.route('/linkInstance')
+@app.route('/linkInstance', methods=['POST'])
 def linkInstance():
-    return 'Hello World!'
+    ipInstance = request.get_json(force=True)
+    print(ipInstance["ip"])
+    teamNotIp = requests.get("https://couchdb.mignolet.fr/teamdb/_design/_all_not_ip/_view/team")
+    print(teamNotIp.json())
+    data = json.loads(teamNotIp.content)
+    print(data["rows"][0]["value"])
+    jsonDataTem = '{"name": "' + str(data["rows"][0]["value"]["name"]) + '" ,"idDevice":"' + str(data["rows"][0]["value"]["idDevice"]) + '", "ipInstance" : "'+str(ipInstance["ip"])+'", "_rev":"'+str(data["rows"][0]["value"]["_rev"])+'"}'
+    print(jsonDataTem)
+    sendIp = requests.put("https://couchdb.mignolet.fr/teamdb/"+str(data["rows"][0]["value"]["_id"])+"",data=jsonDataTem)
+    return json_response(sendIp.json())
 
 #redirecte instance for team
 @app.route('/redirecte')
 def redirecte():
     return 'redirecte'
+
+
+#redirecte instance for team
+@app.route('/picture')
+def picture():
+    screenRasp("3")
+    # get picture
+    imagefile = request.files['file']
+    print(imagefile)
+    # get data json
+    jsonData = requests.get_json(force=True)
+    data = jsonData.loads(jsonData.content)
+    print(data)
+
+
+    #screenRasp("2")
+    return 'redirecte'
+
+#publish status Mqtt
+def screenRasp(status):
+    mqttc = connectMqtt()
+    mqttc.publish("picture/test", status)
+    print(status)
+
+#connection mqtt
+def connectMqtt():
+    mqttc = mqtt.Client()
+    # Uncomment to enable debug messages
+    # mqttc.on_log = on_log
+
+    # Parse CLOUDMQTT_URL (or fallback to localhost)
+    url_str = os.environ.get('CLOUDMQTT_URL', "mqtt://hrrgcrqx:af3wqGskmMfY@m20.cloudmqtt.com:12771")
+    url = urlparse.urlparse(url_str)
+
+    # Connect
+    mqttc.username_pw_set(url.username, url.password)
+    mqttc.connect(url.hostname, url.port)
+    print("mqttc connecte")
+    return mqttc
+
+def on_connect(client, userdata, flags, rc):
+    print("rc: " + str(rc))
+
+def on_message(client, obj, msg):
+    print(msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
+
+def on_publish(client, obj, mid):
+    print("mid: " + str(mid))
+
+def on_log(client, obj, level, string):
+    print(string)
 
 
 
