@@ -203,6 +203,7 @@ def picture():
     print(urlInstance)
 
     try:
+        print("send image")
         reponseVisio = requests.put(urlInstance, data=jsonData)
         if reponseVisio:
             screenRasp("1")
@@ -210,6 +211,7 @@ def picture():
             screenRasp("2")
         return reponseVisio
     except:
+        print("error send image")
         screenRasp("2")
         return json_error("serveur en maintemance")
 
