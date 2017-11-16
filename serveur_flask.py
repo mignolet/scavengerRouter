@@ -1,3 +1,4 @@
+#-*- encoding:utf-8 -*-
 from json_responses import json_response, json_data, json_error
 from flask import Flask, request
 import json
