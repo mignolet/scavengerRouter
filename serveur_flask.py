@@ -102,8 +102,6 @@ def inscript():
 
     return json_response(r.json(), r.status_code)
 
-
-
 #id beacon send picture
 @app.route('/beaconSendPicture', methods=['GET'])
 def beaconSendPicture():
@@ -113,9 +111,6 @@ def beaconSendPicture():
     print(data["rows"][0]["value"])
     dataValue = data["rows"][0]["value"]
     return json_response(dataValue, r.status_code)
-
-
-
 
 #liste objet search
 @app.route('/liste' , methods=['GET'])
@@ -163,8 +158,6 @@ def newsListe():
     else:
         jsonretour = getliste(num)
     return json_response(jsonretour)
-
-
 
 #link instance for team
 @app.route('/linkInstance', methods=['POST'])
@@ -223,26 +216,34 @@ def picture():
 @app.route('/teamPicture', methods=['POST'])
 def teampicture():
     jsonData = request.get_json(force=True)
-    dataTeam = requests.get("https://couchdb.mignolet.fr/teamdb/" + str(jsonData["id_Equipe"]))
+    print(jsonData)
+    dataTeam = requests.get("https://couchdb.mignolet.fr/teamdb/" + str(jsonData["id_equipe"]))
     Hote = json.loads(dataTeam.content)
     urlInstance = Hote["ipInstance"] + ":5000" + "/getImage"
-    jsonEquipe = '{"id_equipe":"'+jsonData["id_Equipe"]+'"}'
+    print(urlInstance)
+    jsonEquipe = '{"id_equipe":"'+jsonData["id_equipe"]+'"}'
+    print(jsonEquipe)
     imageEquipe = requests.put(urlInstance, data=jsonEquipe)
     return json_response(imageEquipe.json())
 
 #get equipe game
 @app.route('/equipeGame', methods=['GET'])
 def allequipeGame():
-    dataTeam = requests.get("https://couchdb.mignolet.fr/teamdb/_design/_all_team/_view/num?limit=20&reduce=false")
+    dataTeam = requests.get("https://couchdb.mignolet.fr/teamdb/_design/_all_team/_view/num?reduce=false")
     print(dataTeam.json())
-    return dataTeam.json()
+    return json_response(dataTeam.json())
 
 #get imaga equipe
 @app.route('/teamPoints', methods=['POST'])
 def teampoints():
     jsonData = request.get_json(force=True)
-    dataTeam = requests.get("https://couchdb.mignolet.fr/objetfinddb/_all_docs?key="+jsonData["id_Equipe"])
-    return dataTeam.json()
+    print(jsonData["id_equipe"])
+    print("https://couchdb.mignolet.fr/objetfinddb/_all_docs?key="+str(jsonData["id_equipe"]))
+    dataTeam = requests.get("https://couchdb.mignolet.fr/objetfinddb/_all_docs?key="+str(jsonData["id_equipe"]))
+    print(dataTeam.json())
+    data = json.loads(dataTeam.content)
+    print(data["total_rows"])
+    return json_response(data["total_rows"]-1)
 
 #publish status Mqtt
 def screenRasp(status):
