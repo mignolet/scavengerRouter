@@ -204,7 +204,7 @@ def picture():
 
     try:
         print("send image")
-        reponseVisio = requests.put(urlInstance, data=jsonData)
+        reponseVisio = requests.post("http://"+str(urlInstance), data=jsonData)
         if reponseVisio:
             screenRasp("1")
         else:
