@@ -99,7 +99,7 @@ def inscript():
 
     #creation de l'instance for team
         #rancher webhook
-
+    requests.post("http://rancher.mignolet.fr:8080/v1-webhooks/endpoint?key=Gi0q0qCiYOH0ADPCKoGaX21iZsO0KKNC3wOc9j3S&projectId=1a1174")
 
     return json_response(r.json(), r.status_code)
 
