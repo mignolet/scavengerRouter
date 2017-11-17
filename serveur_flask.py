@@ -94,7 +94,7 @@ def inscript():
     print(jsonTeam)
 
     #write in couchdb news team
-    r = requests.put("https://"+admin+":"+pwd+"@couchdb.mignolet.fr/teamdb/"+str(jsonData), data=jsonTeam)
+    r = requests.put("https://admin:adminsoc@couchdb.mignolet.fr/teamdb/"+str(jsonData), data=jsonTeam)
     print(r.json())
 
     #creation de l'instance for team
@@ -148,7 +148,7 @@ def newsListe():
         print("liste: "+str(jsonListe))
 
         #send news liste in liste search in couchbd
-        listeOb = requests.put("https://" + admin + ":" + pwd + "@couchdb.mignolet.fr/listesearchdb/liste"+str(num+1)+"",data=jsonListe)
+        listeOb = requests.put("https://admin:adminsoc@couchdb.mignolet.fr/listesearchdb/liste"+str(num+1)+"",data=jsonListe)
         print("retour send couchdb: "+str(listeOb.json()))
 
         #update etat du jeu
