@@ -206,7 +206,8 @@ def picture():
         print("send image")
         print(jsonData)
         reponseVisio = requests.post("http://"+str(urlInstance), data=jsonData)
-        if reponseVisio:
+        resp = json.loads(reponseVisio.content)
+        if resp["message"] == "True":
             screenRasp("1")
         else:
             screenRasp("2")
