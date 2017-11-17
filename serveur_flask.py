@@ -11,9 +11,6 @@ from time import sleep
 app = Flask(__name__)
 app.debug = True
 
-admin = os.environ.get("LOGINCOUCHDB")
-pwd = os.environ.get("PWDCOUCHDB")
-
 
 def on_connect(client, userdata, flags, rc):
     print("rc: " + str(rc))
@@ -55,7 +52,7 @@ def initGame():
     jsonParty = '{"etat":"0"}'
     print(jsonParty)
     # write in couchdb news team
-    r = requests.put("https://" + admin + ":" + pwd + "@couchdb.mignolet.fr/partydb/party" + str(num) + "", data=jsonParty)
+    r = requests.put("https://admin:adminsoc@couchdb.mignolet.fr/partydb/party" + str(num) + "", data=jsonParty)
     print(r.json())
     return json_response('start game')
 
