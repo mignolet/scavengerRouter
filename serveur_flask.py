@@ -206,6 +206,7 @@ def picture():
         print("send image")
         print(jsonData)
         reponseVisio = requests.post("http://"+str(urlInstance), data=jsonData)
+        print("response")
         resp = json.loads(reponseVisio.content)
         if resp["message"] == "True":
             screenRasp("1")
@@ -224,7 +225,7 @@ def teampicture():
     print(jsonData)
     dataTeam = requests.get("https://couchdb.mignolet.fr/teamdb/" + str(jsonData["id_equipe"]))
     Hote = json.loads(dataTeam.content)
-    urlInstance = Hote["ipInstance"] + ":5000" + "/getImage"
+    urlInstance = "http://"+ Hote["ipInstance"] + ":5000" + "/getImage"
     print(urlInstance)
     jsonEquipe = '{"id_equipe":"'+jsonData["id_equipe"]+'"}'
     print(jsonEquipe)
